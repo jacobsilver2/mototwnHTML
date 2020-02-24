@@ -1,8 +1,14 @@
-jQuery(document).ready(function() {
+$(document).ready(function() {
   const regExp = /\(([^)]+)\)/;
   const dateRegExp = /[0-9]{2}-(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)-[0-9]{2}/g;
-  // add title class around title
-  jQuery("div p:first-child b").addClass("title");
+  // add title class around title, then replace the b tag with a div
+
+  $("div p:first-child b").addClass("title");
+  const originalTitleElement = $("div p:first-child b");
+  const replacedTitle = replaceTag(originalTitleElement, "div");
+  $("div p:first-child b")
+    .replaceWith(replacedTitle)
+    .addClass("title");
 
   let markers = document.querySelectorAll(".title"),
     l = markers.length,
@@ -13,16 +19,16 @@ jQuery(document).ready(function() {
     txt = markers[i].nextSibling;
 
     // now we're looking to see if it has an alt-title, is instrumental, or is from a film
-    const altTitleText = markers[i].parentElement.nextElementSibling.innerText;
+    const altText = markers[i].parentElement.nextElementSibling.innerText;
     const altTitleElement = markers[i].parentElement.nextElementSibling;
     if (
-      altTitleText.includes("alt title") ||
-      altTitleText.includes("[instrumental]") ||
-      altTitleText.includes("[from film") ||
-      altTitleText.includes("[from musical]")
+      altText.includes("alt title") ||
+      altText.includes("[instrumental]") ||
+      altText.includes("[from film") ||
+      altText.includes("[from musical") ||
+      altText.includes("[tribute to")
     ) {
-      // console.log(altTitleText);
-      jQuery(altTitleElement).remove();
+      $(altTitleElement).remove();
     }
 
     // now we're looking to see if it's instrumental AND has an alt title.
@@ -33,11 +39,11 @@ jQuery(document).ready(function() {
     const altTitleAndInstrumentalElement =
       markers[i].parentElement.nextElementSibling;
     if (altTitleAndInstrumentalText.includes("[instrumental]")) {
-      jQuery(altTitleAndInstrumentalElement).remove();
+      $(altTitleAndInstrumentalElement).remove();
     }
 
-    jQuery(txt).wrap(`<div class="composer" id=${i} />`);
-    const jText = jQuery(txt).text();
+    $(txt).wrap(`<div class="composer" id=${i} />`);
+    const jText = $(txt).text();
 
     const composerRegexMatch = regExp.exec(jText);
 
@@ -46,6 +52,7 @@ jQuery(document).ready(function() {
           .replace(composerRegexMatch[1], "")
           .replace("()", "")
           .replace(dateRegExp, "")
+          .replace("published ", "")
           .trimLeft()
       : null;
 
@@ -63,33 +70,91 @@ jQuery(document).ready(function() {
     // add a sibling class called 'publisher' and put the publisher inside the tag
     if (txt) {
       txt.textContent = `Composer: ${stringedMatch}`;
-      if (altTitleText.includes("alt title")) {
-        jQuery(`#${i}`).after(
-          `<div class="alt-title">Alt Title: ${altTitleText.replace(
+      if (altText.includes("alt title")) {
+        $(`#${i}`).after(
+          `<div class="alt-title">Alt Title: ${altText.replace(
             "alt title: ",
             ""
           )}</div>`
         );
-      } else if (altTitleText.includes("[instrumental]")) {
-        jQuery(`#${i}`).after(`<div class="instrumental">instrumental</div>`);
+      } else if (altText.includes("[instrumental]")) {
+        $(`#${i}`).after(`<div class="instrumental">instrumental</div>`);
+      } else if (altText.includes("[from film")) {
+        $(`#${i}`).after(
+          `<div class="from-film">From Film: ${altText
+            .replace("[", "")
+            .replace("]", "")
+            .replace("from film ", "")}</div>`
+        );
+      } else if (altText.includes("[from musical")) {
+        $(`#${i}`).after(
+          `<div class="from-musical">From Musical: ${altText
+            .replace("[", "")
+            .replace("]", "")
+            .replace("from musical ", "")}</div>`
+        );
+      } else if (altText.includes("[tribute to")) {
+        $(`#${i}`).after(
+          `<div class="tribute-to">Tribute to: ${altText
+            .replace("[", "")
+            .replace("]", "")
+            .replace("tribute to ", "")}</div>`
+        );
       }
+
       if (altTitleAndInstrumentalText.includes("[instrumental]")) {
-        jQuery(`#${i}`).after(`<div class="instrumental">instrumental</div>`);
+        $(`#${i}`).after(`<div class="instrumental">instrumental again</div>`);
       }
       publisherTxt &&
-        jQuery(`#${i}`).after(
+        $(`#${i}`).after(
           `<div class="publisher">Publisher: ${publisherTxt}</div>`
         );
       publishedDate &&
-        jQuery(`#${i}`).after(
+        $(`#${i}`).after(
           `<div class="published-date">Published Date: ${publishedDate}</div>`
         );
     }
   }
+
+  // now we're going to loop through each song and add an artist tag around each artist-albumSet
+
+  $(".song p b").each(function(i, obj) {
+    const par = $(obj).parent();
+    const next = $(obj)
+      .parent()
+      .next();
+    // $(par).addClass("artist");
+    // $(next).addClass("artist-albums");
+    $(par)
+      .add(next)
+      .wrapAll('<div class="artist" />');
+  });
 });
 
-// VIBE:
-// Get text inside parens
-// Get text outside parens
-// Wrap tags around each item
-// place back into DOM
+// now we're going to loop through each artist class and divide it up a bit
+
+/*
+ * replaceTag
+ * @return {$object} a new object with replaced opening and closing tag
+ */
+function replaceTag($element, newTagName) {
+  // Identify opening and closing tag
+  var oldTagName = $element[0].nodeName,
+    elementString = $element[0].outerHTML,
+    openingRegex = new RegExp("^(<" + oldTagName + " )", "i"),
+    openingTag = elementString.match(openingRegex),
+    closingRegex = new RegExp("(</" + oldTagName + ">)$", "i"),
+    closingTag = elementString.match(closingRegex);
+
+  if (openingTag && closingTag && newTagName) {
+    // Remove opening tag
+    elementString = elementString.slice(openingTag[0].length);
+    // Remove closing tag
+    elementString = elementString.slice(0, -closingTag[0].length);
+    // Add new tags
+    elementString =
+      "<" + newTagName + " " + elementString + "</" + newTagName + ">";
+  }
+
+  return $(elementString);
+}
