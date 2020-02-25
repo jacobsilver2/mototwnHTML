@@ -129,10 +129,18 @@ $(document).ready(function() {
       .add(next)
       .wrapAll('<div class="artist" />');
   });
+  $(".artist").each(function(i, obj) {
+    const artistAndRecordingInfo = obj.firstChild;
+    const artistAlbums = obj.lastChild;
+
+    const artistAndRecordingInfoArray = artistAndRecordingInfo.innerText.split(
+      ";"
+    );
+    console.log(artistAndRecordingInfoArray);
+  });
 });
 
 // now we're going to loop through each artist class and divide it up a bit
-
 /*
  * replaceTag
  * @return {$object} a new object with replaced opening and closing tag
