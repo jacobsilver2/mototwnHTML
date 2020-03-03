@@ -4,11 +4,18 @@ $(document).ready(function() {
   // add title class around title, then replace the b tag with a div
 
   $("div p:first-child b").addClass("title");
-  const originalTitleElement = $("div p:first-child b");
-  const replacedTitle = replaceTag(originalTitleElement, "div");
-  $("div p:first-child b")
-    .replaceWith(replacedTitle)
-    .addClass("title");
+  // const originalTitleElement = $("div p:first-child b");
+  // const replacedTitle = replaceTag(originalTitleElement, "div");
+  // $("div p:first-child b")
+  //   .replaceWith(replacedTitle)
+  //   .addClass("title");
+
+  $("div p:first-child b").each(function(i, obj) {
+    const replacedTitle = replaceTag(obj, "div");
+    $(obj)
+      .replaceWith(replacedTitle)
+      .addClass("title");
+  });
 
   let markers = document.querySelectorAll(".title"),
     l = markers.length,
@@ -129,51 +136,69 @@ $(document).ready(function() {
       .add(next)
       .wrapAll('<div class="artist" />');
   });
+
+  // now we're going to loop through each artist class and divide it up a bit
   $(".artist").each(function(i, obj) {
     const artistAndRecordingInfo = obj.firstChild;
+    const recordingInfoTextArry = obj.firstChild.innerText.split(";");
+    // removing the first element. we don't need it.
+    recordingInfoTextArry.shift();
+    const artistName = obj.firstChild.innerText.split(";")[0];
     const artistAlbums = obj.lastChild;
-
-    const artistAndRecordingInfoArray = artistAndRecordingInfo.innerText.split(
-      ";"
-    );
-    const recordingInfo = artistAndRecordingInfoArray.filter(el =>
-      el.includes("recorded")
-    );
-    const completedInfo = artistAndRecordingInfoArray.filter(el =>
-      el.includes("completed")
-    );
-    completedInfo[0] && console.log(completedInfo[0].match(dateRegExp));
-    // console.log(artistAndRecordingInfoArray);
     $(artistAndRecordingInfo).remove();
-    $(obj).append(
-      `<div class="artist-name">Artist Name: ${artistAndRecordingInfoArray[0]}</div>`
-    );
-    recordingInfo[0] &&
-      $(obj).append(
-        `<div class="studio">Recorded: ${recordingInfo[0]
-          .replace("recorded ", "")
-          .replace("completed ", "")
-          .replace(dateRegExp, "")
-          .replace(",", "")}</div>`
-      );
-    completedInfo[0] &&
-      $(obj).append(
-        `<div class="completed">Completed: ${completedInfo[0].match(
-          dateRegExp
-        )}</div>`
+    recordingInfoTextArry.forEach(element => {
+      // console.log(element);
+      if (element.includes("recorded")) {
+        if (element.match(dateRegExp)) {
+          $(obj).prepend(
+            `<div class="recording-completed">Recording Completed: ${
+              element.match(dateRegExp)[0]
+            }</div>`
+          );
+        }
+        $(obj).prepend(
+          `<div class="recording-location">Recording Location: ${element
+            .replace("recorded ", "")
+            .replace(", completed ", "")
+            .replace(dateRegExp, "")}</div>`
+        );
+      } else if (element.includes("produced")) {
+        $(obj).prepend(
+          `<div class="producer">Producer: ${element.replace(
+            "produced by ",
+            ""
+          )}</div>`
+        );
+      } else if (element.includes("arranged")) {
+        $(obj).prepend(
+          `<div class="arranger">Arranged By: ${element.replace(
+            "arranged by ",
+            ""
+          )}</div>`
+        );
+      } else {
+        $(obj).prepend(
+          `<div class="recording-additional-info">Additional Info: ${element
+            .replace("[", "")
+            .replace("]", "")}</div>`
+        );
+      }
+    });
+    artistName &&
+      $(obj).prepend(
+        `<div class="artist-name">Artist Name: ${artistName}</div>`
       );
   });
 });
 
-// now we're going to loop through each artist class and divide it up a bit
 /*
  * replaceTag
  * @return {$object} a new object with replaced opening and closing tag
  */
 function replaceTag($element, newTagName) {
   // Identify opening and closing tag
-  var oldTagName = $element[0].nodeName,
-    elementString = $element[0].outerHTML,
+  var oldTagName = $element.nodeName,
+    elementString = $element.outerHTML,
     openingRegex = new RegExp("^(<" + oldTagName + " )", "i"),
     openingTag = elementString.match(openingRegex),
     closingRegex = new RegExp("(</" + oldTagName + ">)$", "i"),
