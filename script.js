@@ -136,7 +136,32 @@ $(document).ready(function() {
     const artistAndRecordingInfoArray = artistAndRecordingInfo.innerText.split(
       ";"
     );
-    console.log(artistAndRecordingInfoArray);
+    const recordingInfo = artistAndRecordingInfoArray.filter(el =>
+      el.includes("recorded")
+    );
+    const completedInfo = artistAndRecordingInfoArray.filter(el =>
+      el.includes("completed")
+    );
+    completedInfo[0] && console.log(completedInfo[0].match(dateRegExp));
+    // console.log(artistAndRecordingInfoArray);
+    $(artistAndRecordingInfo).remove();
+    $(obj).append(
+      `<div class="artist-name">Artist Name: ${artistAndRecordingInfoArray[0]}</div>`
+    );
+    recordingInfo[0] &&
+      $(obj).append(
+        `<div class="studio">Recorded: ${recordingInfo[0]
+          .replace("recorded ", "")
+          .replace("completed ", "")
+          .replace(dateRegExp, "")
+          .replace(",", "")}</div>`
+      );
+    completedInfo[0] &&
+      $(obj).append(
+        `<div class="completed">Completed: ${completedInfo[0].match(
+          dateRegExp
+        )}</div>`
+      );
   });
 });
 
