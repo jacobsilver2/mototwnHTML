@@ -1,8 +1,9 @@
 $(document).ready(function() {
   const regExp = /\(([^)]+)\)/;
   const dateRegExp = /[0-9]{2}-(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)-[0-9]{2}/g;
-  // add title class around title, then replace the b tag with a div
+  const dateRegExpExact = /([0-9]{2}-(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)-[0-9]{2})/g;
 
+  // add title class around title, then replace the b tag with a div
   $("div p:first-child b").addClass("title");
   // const originalTitleElement = $("div p:first-child b");
   // const replacedTitle = replaceTag(originalTitleElement, "div");
@@ -145,6 +146,45 @@ $(document).ready(function() {
     recordingInfoTextArry.shift();
     const artistName = obj.firstChild.innerText.split(";")[0];
     const artistAlbums = obj.lastChild;
+
+    //working on method to separate albums into an array
+    const artistAlbumsDateMatch = artistAlbums.innerText.match(dateRegExpExact);
+    console.log(artistAlbumsDateMatch);
+    let previousIndex = 0;
+    const returnedAlbumsArray = [];
+
+    const returnedAlbums =
+      artistAlbumsDateMatch &&
+      artistAlbumsDateMatch.forEach(function(date, i) {
+        const currentIndex = artistAlbums.innerText.indexOf(date, 0);
+        console.log(
+          `previous index is ${previousIndex}. Current index is ${currentIndex}`
+        );
+        if (i > 1) {
+          console.log(
+            artistAlbums.innerText.slice(previousIndex, currentIndex)
+          );
+          previousIndex = currentIndex;
+          debugger;
+        } else if (i === 0) {
+          const nextIndex = artistAlbums.innerText.indexOf(
+            artistAlbumsDateMatch[i + 1],
+            0
+          );
+          console.log(artistAlbums.innerText.slice(currentIndex, nextIndex));
+          previousIndex = nextIndex;
+          debugger;
+        } else if (i === 1) {
+          const nextIndex = artistAlbums.innerText.indexOf(
+            artistAlbumsDateMatch[i + 1],
+            0
+          );
+          console.log(artistAlbums.innerText.slice(currentIndex, nextIndex));
+          // previousIndex = currentIndex;
+          debugger;
+        }
+      });
+
     $(artistAndRecordingInfo).remove();
     recordingInfoTextArry.forEach(element => {
       // console.log(element);
