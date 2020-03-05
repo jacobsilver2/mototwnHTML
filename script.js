@@ -1,7 +1,7 @@
 $(document).ready(function() {
   const regExp = /\(([^)]+)\)/;
-  const dateRegExp = /[0-9]{2}-(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)-[0-9]{2}/g;
-  const dateRegExpExact = /([0-9]{2}-(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)-[0-9]{2})/g;
+  const dateRegExp = /([0-9]{2}-(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)-[0-9]{2};)|((Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)-[0-9]{2};)|[0-9]{4};/g;
+  const dateRegExpExact = /([0-9]{2}-(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)-[0-9]{2};)|((Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)-[0-9]{2};)|[0-9]{4};|(\[pressing date unknown\])/g;
 
   // add title class around title, then replace the b tag with a div
   $("div p:first-child b").addClass("title");
@@ -146,21 +146,28 @@ $(document).ready(function() {
     recordingInfoTextArry.shift();
     const artistName = obj.firstChild.innerText.split(";")[0];
     const artistAlbums = obj.lastChild;
+    let artistAlbumsText = artistAlbums.innerText;
     $(artistAlbums).remove();
+
     //separate albums into an array
-    const artistAlbumsDateMatch = artistAlbums.innerText.match(dateRegExpExact);
-    const returnedAlbumsArray = [];
+    const artistAlbumsDateMatch = artistAlbumsText.match(dateRegExpExact);
     artistAlbumsDateMatch &&
       artistAlbumsDateMatch.forEach(function(date, i) {
-        const currentIndex = artistAlbums.innerText.indexOf(date, 0);
-        const nextIndex = artistAlbums.innerText.indexOf(
+        const currentIndex = artistAlbumsText.indexOf(date, 0);
+        const nextIndex = artistAlbumsText.indexOf(
           artistAlbumsDateMatch[i + 1],
-          0
+          currentIndex + 1
         );
 
-        const albumInfo = artistAlbums.innerText.slice(currentIndex, nextIndex);
+        let albumInfo;
+        if (nextIndex != -1) {
+          albumInfo = artistAlbumsText.slice(currentIndex, nextIndex);
+        } else {
+          albumInfo = artistAlbumsText.slice(currentIndex);
+        }
         albumInfo &&
           $(obj).append(`<div class="album-info">Album: ${albumInfo}</div>`);
+        artistAlbumsText = artistAlbumsText.slice(nextIndex);
       });
 
     $(artistAndRecordingInfo).remove();
