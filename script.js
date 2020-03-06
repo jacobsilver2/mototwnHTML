@@ -1,9 +1,11 @@
 $(document).ready(function() {
   const regExp = /\(([^)]+)\)/;
-  const dateRegExp = /([0-9]{2}-(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)-[0-9]{2})|((Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)-[0-9]{2};)|[0-9]{4}/g;
+  const dateRegExp = /([0-9]{2}-(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)-[0-9]{2})|((Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)-[0-9]{2};)|[0-9]{4};/g;
+  const dateRegExpAlbum = /([0-9]{2}-(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)-[0-9]{2})|((Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)-[0-9]{2};)|[0-9]{4};/g;
   const dateRegExpExact = /([0-9]{2}-(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)-[0-9]{2};)|((Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)-[0-9]{2};)|[0-9]{4};|(\[pressing date unknown\])/g;
-
-  // add title class around title, then replace the b tag with a div
+  const formatRegExp = /(CD|LP|45|MP3)(?: )?(?:\((S|M)\))?:/g;
+  const recordLabelRegExp = /Motown|Tamla|Hip-O Select|Flapjack Records Digital Release|Reader's Digest|Brunswick|Soul|Ric Tic|Rare Earth|UMC Digital Release|BMG Victor|Britannia|Spectrum|Gordy|Singing Machine|Sound Of America|Check Mate|Workshop|Real Gone Music|Columbia|End|United Artists|Collectables CD|Golden World|Debutante|Kent|Wingate|DPSM|Shout|Soulmusic|Ace|Stephanye|Checker|Anna|YAN|V\.I\.P\.|Big Break|Sounds Superb|Rhino|Chess|Black Forum|Polydor|Disques Flèche|Edsel|Light In The Attic|Maltese|Ridge|Volkano|Yesteryear|Fresh Sounds|MoJazz|Natural Resources|Discover America|Chisa|JerryO|ABC|MFP|Harvey|Power|Polygram Special Markets|Stateside|BGO/g;
+  // add title class around title, then replace the b tag with a div(this part didn't really work well)
   $("div p:first-child b").addClass("title");
   // const originalTitleElement = $("div p:first-child b");
   // const replacedTitle = replaceTag(originalTitleElement, "div");
@@ -167,12 +169,36 @@ $(document).ready(function() {
         }
         albumInfo &&
           $(obj).append(`<div class="album-info">Album: ${albumInfo}</div>`);
+        //album date
+        const releaseDate = albumInfo.match(dateRegExpAlbum);
+        releaseDate &&
+          $(obj).append(
+            `<div class="album-release-date">Release Date: ${releaseDate[0].replace(
+              ";",
+              ""
+            )}</div>`
+          );
+        //format
+        const formatType = albumInfo.match(formatRegExp);
+        formatType &&
+          $(obj).append(
+            `<div class="album-format">Format: ${formatType[0].replace(
+              ":",
+              ""
+            )}</div>`
+          );
+        //record label
+        const recordLabel = albumInfo.match(recordLabelRegExp);
+        console.log(recordLabel);
+        recordLabel &&
+          $(obj).append(
+            `<div class="album-record-label">Record Label: ${recordLabel[0]}</div>`
+          );
         artistAlbumsText = artistAlbumsText.slice(nextIndex);
       });
 
     $(artistAndRecordingInfo).remove();
     recordingInfoTextArry.forEach(element => {
-      // console.log(element);
       if (element.includes("recorded")) {
         if (element.match(dateRegExp)) {
           $(obj).prepend(
