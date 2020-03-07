@@ -4,3 +4,12 @@
 .title {
   font-weight: bold;
 }
+
+.artist {
+  margin-bottom: 10px;
+}
+
+.album {
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
