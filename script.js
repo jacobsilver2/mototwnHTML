@@ -175,15 +175,11 @@ $(document).ready(function() {
         if (nextIndex != -1) {
           albumInfo = artistAlbumsText.slice(currentIndex, nextIndex);
           wrapper = document.createElement("div");
-          // wrapper.innerText = albumInfo;
           $(wrapper).addClass("album");
-          // console.log(wrapper);
         } else {
           albumInfo = artistAlbumsText.slice(currentIndex);
           wrapper = document.createElement("div");
           $(wrapper).addClass("album");
-          // wrapper.innerText = albumInfo;
-          // console.log(wrapper);
         }
 
         // get the same values for innerHTML
@@ -299,6 +295,7 @@ $(document).ready(function() {
         `<div class="artist-name">Artist Name: ${artistName}</div>`
       );
   });
+  console.log(document.documentElement.innerHTML);
 });
 
 /*
