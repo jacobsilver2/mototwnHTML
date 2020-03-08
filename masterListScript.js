@@ -4,7 +4,7 @@ $(document).ready(function() {
     const songObj = {};
     // title object (including composer, publisher, published-date, alt-title, instrumental
     const titleObj = {};
-    const artistObj = {};
+    const artistsArr = [];
     const title = $(song).find(".title");
     const composer = $(song).find(".composer");
     const publisher = $(song).find(".publisher");
@@ -32,12 +32,14 @@ $(document).ready(function() {
     $(song)
       .find(".artist")
       .each((key, artist) => {
+        const artistObj = {};
         const albumsArr = [];
         const recordingInfoObj = {};
         const artistName = $(artist).find(".artist-name");
         const producer = $(artist).find(".producer");
         const recordingLocation = $(artist).find(".recording-location");
         const recordingCompleted = $(artist).find(".recording-completed");
+        const additionalInfo = $(artist).find("recording-additional-info");
 
         artistName[0] &&
           Object.assign(artistObj, { artistName: artistName[0].innerText });
@@ -51,23 +53,61 @@ $(document).ready(function() {
           Object.assign(recordingInfoObj, {
             completed: recordingCompleted[0].innerText
           });
+        additionalInfo[0] &&
+          Object.assign(recordingInfoObj, {
+            additionalInfo: additionalInfo[0].innerText
+          });
         artistObj.recordingInfo = recordingInfoObj;
-        songObj.artist = artistObj;
 
         $(artist)
           .find(".album")
           .each((key, album) => {
             const albumObj = {};
             const albumTitle = $(album).find(".album-name");
+            const catalogNumber = $(album).find(".album-catalog-number");
+            const recordLabel = $(album).find(".album-record-label");
+            const format = $(album).find(".album-format");
+            const releaseDate = $(album).find(".album-release-date");
+            const info = $(album).find(".album-info");
 
             albumTitle[0] &&
               Object.assign(albumObj, { albumTitle: albumTitle[0].innerText });
+            catalogNumber[0] &&
+              Object.assign(albumObj, {
+                catalogNumber: catalogNumber[0].innerText
+              });
+            recordLabel[0] &&
+              Object.assign(albumObj, {
+                recordLabel: recordLabel[0].innerText
+              });
+            format[0] &&
+              Object.assign(albumObj, { format: format[0].innerText });
+            releaseDate[0] &&
+              Object.assign(albumObj, {
+                releaseDate: releaseDate[0].innerText
+              });
+            info[0] && Object.assign(albumObj, { info: info[0].innerText });
             albumsArr.push(albumObj);
           });
         artistObj.albums = albumsArr;
-      });
 
+        artistsArr.push(artistObj);
+      });
+    songObj.artists = artistsArr;
     songArray.push(songObj);
   });
   console.log(songArray);
 });
+
+function downloadObject(obj, filename) {
+  var blob = new Blob([JSON.stringify(obj, null, 2)], {
+    type: "application/json;charset=utf-8"
+  }).slice(2, -1);
+  var url = URL.createObjectURL(blob);
+  var elem = document.createElement("a");
+  elem.href = url;
+  elem.download = filename;
+  document.body.appendChild(elem);
+  elem.click();
+  document.body.removeChild(elem);
+}
