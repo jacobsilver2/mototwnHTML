@@ -27,7 +27,7 @@ $(document).ready(function() {
     tributeTo[0] &&
       Object.assign(titleObj, { tributeTo: tributeTo[0].innerText });
 
-    songObj.title = titleObj;
+    songObj.song = titleObj;
 
     $(song)
       .find(".artist")
